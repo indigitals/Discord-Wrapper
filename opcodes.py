@@ -8,7 +8,7 @@ class BaseSocketInfo:
             "op": op,
             "d": data
         })
-    def returnIdentity(self, token: str, os: str, browser: str, device: str):
+    def returnIdentity(self, token: str, os: str = "linux", browser: str = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36", device: str = "pc"):
         return self.createPayload(2, 
         {
             "token": token,
