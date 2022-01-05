@@ -24,6 +24,7 @@ class SocketConn:
         self.loop = asyncio.get_event_loop()
         self._await = self.loop.run_until_complete
         self.sequence = None
+        self.ready = False
         self.ws = self._await(self.initWS(
             {
             "max_msg_size": 0,
@@ -50,8 +51,15 @@ class SocketConn:
     async def send_identify(self):
         await self.send(self.info.returnIdentity(self.token))
         self.interval = (json.loads(await self.recv()))["d"]["heartbeat_interval"]/1000.0 
+        print(self.interval)
 
     async def keep_conn(self):
+        while self.interval is not None:
+            print('Sending Heartbeat')
+            await self.send(self.info.returnHeartbeat(self.sequence if self.sequence else None))
+            await asyncio.sleep(self.interval)
 
+    async def check_ready(self):
+        
+    async def tempmain(self, token):
 
-    async def send_heartbeat()

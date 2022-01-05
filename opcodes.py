@@ -24,7 +24,7 @@ class BaseSocketInfo:
             "v": 3,
         })
 
-    def returnHeartbeat(self, sequence: int):
+    def returnHeartbeat(self, sequence):
         return self.createPayload(1,
         {
             "sequence": sequence
