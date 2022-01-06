@@ -60,12 +60,12 @@ class SocketConn:
         while self.interval is not None:
             print('Sending Heartbeat')
             print(self.sequence)
-            await self.send(self.info.returnHeartbeat(self.sequence if self.sequence else None))
+            await self.send(self.info.returnHeartbeat(self.sequence if self.sequence is not None else 'null'))
             await asyncio.sleep(self.interval)
 
     async def check_ready(self):
         print("Check Ready")
-        async for message in await self.recv():
+        for message in await self.recv():
             print("< {}".format(message))
             data = json.loads(message)
             if data["op"] == DISPATCH:
@@ -82,5 +82,5 @@ class SocketConn:
 
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(SocketConn("").tempmain())
+    loop.run_until_complete(SocketConn("ODY3MDk1MTMxMDM1MjcxMTg4.YamZSg.nGktHesPJ9xl_Jv2Im-96hiFOvs").tempmain())
 
