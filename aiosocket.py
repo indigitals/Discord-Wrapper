@@ -42,7 +42,7 @@ class SocketConn:
         return aiohttp.ClientSession()
 
     async def initWS(self, **kwargs):
-        return await self.session.ws_connect("wss://gateway.discord.gg/?encoding=json&v=9&compress", **kwargs)
+        return await self.session.ws_connect("wss://gateway.discord.gg/?encoding=json&v=9", **kwargs)
 
     async def send(self, payload):
         return await self.ws.send_json(payload)
@@ -82,5 +82,5 @@ class SocketConn:
 
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(SocketConn("ODY3MDk1MTMxMDM1MjcxMTg4.YamZSg.nGktHesPJ9xl_Jv2Im-96hiFOvs").tempmain())
+    loop.run_until_complete(SocketConn("ODY3MDk1MTMxMDM1MjcxMTg4.YdZHyg.0_yg2og_yNu-sPYWXDs5UOxh4O0").tempmain())
 

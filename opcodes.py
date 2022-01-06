@@ -25,7 +25,4 @@ class BaseSocketInfo:
         })
 
     def returnHeartbeat(self, sequence):
-        return self.createPayload(1,
-        {
-            "sequence": sequence
-        })
+        return self.createPayload(1, sequence)
