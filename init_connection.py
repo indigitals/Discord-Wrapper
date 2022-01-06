@@ -1,6 +1,5 @@
-#from socket import SocketKind
+
 import websockets
-import random
 import asyncio
 import json
 from opcodes import * 
@@ -22,28 +21,27 @@ class Connection:
     HEARTBEAT_ACK = 11
     def __init__(self, token: str):
         self.token = token
-        self.info = BaseSocketInfo()
-        self.loop = asyncio.get_event_loop()
-        self._await = self.loop.run_until_complete
-        self._forever = self.loop.run_forever
         self.sequence = None
         self.ready = False
         self.session_id = None
         self.interval = None
         self.user_agent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36" #might use later otherwise redundant afaik
+        self.info = BaseSocketInfo()
+        self.loop = asyncio.get_event_loop()
+        self._await = self.loop.run_until_complete
+        self._task = self.loop.create_task
         self.ws = self._await(self.initWS())
-        self._await(self.send_heartbeat())
+        self.interval = (json.loads(self._await(self.ws.recv())))["d"]["heartbeat_interval"]/1000.0 
 
     async def initWS(self):
-       return await websockets.connect("wss://gateway.discord.gg/?encoding=json&v=9")
+       return await websockets.connect("wss://gateway.discord.gg/?encoding=json&v=9") #add headers to prevent security disables? 
 
     async def send(self, payload):
         return await self.ws.send(payload)
 
     async def send_identify(self):
-        #print("sent")
+        print("sent identity")
         await self.send(self.info.returnIdentity(self.token))
-        self.interval = (json.loads(await self.ws.recv()))["d"]["heartbeat_interval"]/1000.0 
 
     async def send_heartbeat(self):
         while self.interval is not None:
@@ -51,26 +49,25 @@ class Connection:
             print("sent heartbeat")
             await asyncio.sleep(self.interval)
 
-
-    async def check_ready(self):
-        #print("Entering receive")
-        async for message in self.ws:
-            #print("<", message)
-            data = json.loads(message)
-            if data["op"] == self.DISPATCH:
-                self.sequence = int(data["s"])
-                if data["t"] == "READY":
-                    self.session_id = data["d"]["session_id"]
-                    return
+    async def msg_handler(self):
+        while True:
+            print("Entering receive")
+            async for message in self.ws:
+                print("<", message[:100]) 
+                data = json.loads(message)
+                if data["op"] == self.DISPATCH:
+                    self.sequence = int(data["s"])
+                    if data["t"] == "READY":
+                        self.session_id = data["d"]["session_id"]
+                        print(self.session_id)
+                        #return
 
 
     async def start(self):
-        await self.send_identify()
-        await asyncio.gather(self.check_ready())
-        print(self.session_id)
+        await asyncio.gather(self._task(self.send_heartbeat()), self.send_identify(), self._task(self.msg_handler()))
 
 
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(Connection("").start())
+    loop.run_until_complete(Connection("TOKEN HERE").start())
 
