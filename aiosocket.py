@@ -53,9 +53,10 @@ class SocketConn:
     async def send_identify(self):
         await self.send(self.info.returnIdentity(self.token, "linux", self.user_agent, "pc"))
         self.interval = (await self.recv())["d"]["heartbeat_interval"]/1000.0 
-        print(self.interval)
+        #print(self.interval)
 
     async def keep_conn(self):
+        print(self.interval)
         while self.interval is not None:
             print('Sending Heartbeat')
             print(self.sequence)
@@ -65,7 +66,7 @@ class SocketConn:
     async def check_ready(self):
         print("Check Ready")
         async for message in await self.recv():
-            print("<", message)
+            print("< {}".format(message))
             data = json.loads(message)
             if data["op"] == DISPATCH:
                 self.sequence = int(data["s"])
@@ -76,7 +77,7 @@ class SocketConn:
 
     async def tempmain(self):
         await self.send_identify()
-        asyncio.gather(self.keep_conn(), self.check_ready())
+        await asyncio.gather(self.keep_conn(), self.check_ready())
 
 
 if __name__ == "__main__":
