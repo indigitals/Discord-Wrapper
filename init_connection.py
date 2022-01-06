@@ -8,7 +8,7 @@ from opcodes import *
 
 
 
-class Connect:
+class Connection:
     DISPATCH = 0
     HEARTBEAT = 1
     IDENTIFY = 2
@@ -64,7 +64,7 @@ class Connect:
                     return
 
 
-    async def tempmain(self):
+    async def start(self):
         await self.send_identify()
         await asyncio.gather(self.check_ready())
         print(self.session_id)
@@ -72,5 +72,5 @@ class Connect:
 
 if __name__ == "__main__":
     loop = asyncio.get_event_loop()
-    loop.run_until_complete(Connect("").tempmain())
+    loop.run_until_complete(Connection("").start())
 
