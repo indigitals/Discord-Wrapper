@@ -1,3 +1,4 @@
+from socket import SocketKind
 import aiohttp
 import random
 import asyncio
@@ -25,22 +26,23 @@ class SocketConn:
         self._await = self.loop.run_until_complete
         self.sequence = None
         self.ready = False
+        self.user_agent = "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/96.0.4664.110 Safari/537.36"
+        self.session = self._await(self.initSession())
         self.ws = self._await(self.initWS(
-            {
+            **{
             "max_msg_size": 0,
-            "timeout": 30.0,
+            #"timeout": 30.0,
             "autoclose": False,
-            "headers": {
-                "User-Agent": self.user_agent,
-            },
+            "headers": {"User-Agent": self.user_agent},
             "compress": 0,
             }
         ))
 
-    
+    async def initSession(self):
+        return aiohttp.ClientSession()
+
     async def initWS(self, **kwargs):
-        async with aiohttp.ClientSession() as client:
-            return client.ws_connect("wss://gateway.discord.gg/?encoding=json&v=9&compress", **kwargs)
+        return await self.session.ws_connect("wss://gateway.discord.gg/?encoding=json&v=9&compress", **kwargs)
 
     async def send(self, payload):
         return await self.ws.send_json(payload)
@@ -49,17 +51,35 @@ class SocketConn:
         return await self.ws.receive_json()
 
     async def send_identify(self):
-        await self.send(self.info.returnIdentity(self.token))
-        self.interval = (json.loads(await self.recv()))["d"]["heartbeat_interval"]/1000.0 
+        await self.send(self.info.returnIdentity(self.token, "linux", self.user_agent, "pc"))
+        self.interval = (await self.recv())["d"]["heartbeat_interval"]/1000.0 
         print(self.interval)
 
     async def keep_conn(self):
         while self.interval is not None:
             print('Sending Heartbeat')
+            print(self.sequence)
             await self.send(self.info.returnHeartbeat(self.sequence if self.sequence else None))
             await asyncio.sleep(self.interval)
 
     async def check_ready(self):
-        
-    async def tempmain(self, token):
+        print("Check Ready")
+        async for message in await self.recv():
+            print("<", message)
+            data = json.loads(message)
+            if data["op"] == DISPATCH:
+                self.sequence = int(data["s"])
+                event_type = data["t"]
+                if event_type == "READY":
+                    self.session_id = data["d"]["session_id"]
+                    print("Got session ID:", self.session_id)
+
+    async def tempmain(self):
+        await self.send_identify()
+        asyncio.gather(self.keep_conn(), self.check_ready())
+
+
+if __name__ == "__main__":
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(SocketConn("").tempmain())
 
