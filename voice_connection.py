@@ -9,8 +9,7 @@ class VC:
     async def voice_update(self): #send the op4 voice state update
         await self.connect.send(self.connect.info.returnVoiceUpdate())
 
-    async def start_vc_messages(self): 
-        """receive responses from the op4 that will be sent out (expecting 2 then cancel)"""
+    async def start_vc_messages(self): #receive responses from the op4 that will be sent out (expecting 2 then cancel)
         while True:
             print("Entering receive")
             async for message in self.connect.ws:
@@ -33,4 +32,5 @@ class VC:
         print(self.token, self.endpoint, self.vc_session)
 
 if __name__=="__main__":
-    VC().init_vc()
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(VC("926987966755266560", "926877164165541908", "ODY3MDk1MTMxMDM1MjcxMTg4.YdZsHw.BlD1ZWszlT03O0bPGfqp_BxiGJk").init_vc())
