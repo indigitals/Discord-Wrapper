@@ -33,27 +33,27 @@ class Connection:
         self.ws = self._await(self.initWS())
         self.interval = (json.loads(self._await(self.ws.recv())))["d"]["heartbeat_interval"]/1000.0 
 
-    async def initWS(self):
+    async def initWS(self): #starts the connection
        return await websockets.connect("wss://gateway.discord.gg/?encoding=json&v=9") #add headers to prevent security disables? 
 
-    async def send(self, payload):
+    async def send(self, payload): #send the payload (convenience)
         return await self.ws.send(payload)
 
-    async def send_identify(self):
+    async def send_identify(self): #sends the op2 identity payload
         print("sent identity")
         await self.send(self.info.returnIdentity(self.token))
 
-    async def send_heartbeat(self):
+    async def send_heartbeat(self): #heartbeats
         while self.interval is not None:
             await self.send(self.info.returnHeartbeat(self.sequence if self.sequence is not None else 'null'))
             print("sent heartbeat")
             await asyncio.sleep(self.interval)
 
-    async def msg_handler(self):
+    async def msg_handler(self): #handles messages. Receive session id and other gateway events (like message deleting)
         while True:
             print("Entering receive")
             async for message in self.ws:
-                print("<", message[:100]) 
+                #print("<", message[:100]) 
                 data = json.loads(message)
                 if data["op"] == self.DISPATCH:
                     self.sequence = int(data["s"])

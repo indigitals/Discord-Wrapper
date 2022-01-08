@@ -23,7 +23,7 @@ class BaseSocketInfo:
     def returnHeartbeat(self, sequence):
         return self.createPayload(1, sequence)
 
-    def returnVoiceUpdate(self, gid: str, cid):
+    def returnVoiceUpdate(self, gid: str, cid: str):
         return self.createPayload(4, {
     "guild_id": gid,
     "channel_id": cid,
