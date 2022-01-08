@@ -13,12 +13,20 @@ class BaseSocketInfo:
 {
         "token": token,
         "properties": {
-            "$os": "windows",
-            "$browser": "chrome",
-            "$device": 'pc'
+            "$os": os,
+            "$browser": browser,
+            "$device": device
         }
         
 })
 
     def returnHeartbeat(self, sequence):
         return self.createPayload(1, sequence)
+
+    def returnVoiceUpdate(self, gid: str, cid):
+        return self.createPayload(4, {
+    "guild_id": gid,
+    "channel_id": cid,
+    "self_mute": False,
+    "self_deaf": False
+  })
