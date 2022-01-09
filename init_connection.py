@@ -41,7 +41,7 @@ class Connection:
 
     async def send_identify(self): #sends the op2 identity payload
         print("sent identity")
-        await self.send(self.info.returnIdentity(self.token))
+        return await self.send(self.info.returnIdentity(self.token))
 
     async def send_heartbeat(self): #heartbeats
         while self.interval is not None:
@@ -52,19 +52,19 @@ class Connection:
     async def msg_handler(self): #handles messages. Receive session id and other gateway events (like message deleting)
         while True:
             print("Entering receive")
-            async for message in self.ws:
-                #print("<", message[:100]) 
-                data = json.loads(message)
-                if data["op"] == self.DISPATCH:
-                    self.sequence = int(data["s"])
-                    if data["t"] == "READY":
-                        self.session_id = data["d"]["session_id"]
-                        print(self.session_id)
-                        #return
+            message = await self.ws.recv()
+            #print("<", message) 
+            data = json.loads(message)
+            if data["op"] == self.DISPATCH:
+                self.sequence = int(data["s"])
+                if data["t"] == "READY":
+                    self.session_id = data["d"]["session_id"]
+                    print(self.session_id)
+                    #return
 
 
     async def start(self):
-        await asyncio.gather(self._task(self.send_heartbeat()), self.send_identify(), self._task(self.msg_handler()))
+        return await asyncio.gather(self._task(self.send_heartbeat()), self.send_identify(), self._task(self.msg_handler()))
 
 
 if __name__ == "__main__":
