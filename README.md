@@ -19,3 +19,5 @@ Note: This is entirely a proof of concept and for educational use. I am not resp
     - [ ] `Guild Member Scraping` 
     - [ ] `Authentication Websockets?` (not really connected to the main discord gateway but this is used for logging into accounts) 
 
+
+Will not be commiting for a little bit until I get the voice connection working 
